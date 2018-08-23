@@ -6,7 +6,7 @@ df = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/iris
 print(df.tail())
 
 y = df.iloc[0:100, 4].values
-y = np.where(y == 'Iris-setosa', -1, 1)
+y = np.where(y == 'Iris-setosa', 0, 1)
 
 number_of_examples = 100
 
@@ -24,8 +24,10 @@ plt.ylabel('petal length [cm]')
 plt.legend(loc='upper left')
 plt.show()
 
+print("SIZES " + str(X.shape))
 
-class Ada:
+
+class LogisticRegression:
 
     def __init__(self, learning_rate=0.01, epochs=50, random_state=1):
         self.learning_rate = learning_rate
@@ -39,17 +41,29 @@ class Ada:
         self.errors = []
 
         for _ in range(self.epochs):
-            z = X.dot(self.weights)
-            difference = y - z
-            error = 0.5 * np.sum(difference ** 2)
+            net_input = self.net_input(X)
+            output = self.activation(net_input)
+
+            difference = y.reshape((y.shape[0], 1)) - output
+
+            error = (-y.dot(np.log(output)) -
+                     ((1 - y).dot(np.log(1 - output))))
+
             self.errors.append(error)
             gradient = - X.transpose().dot(difference)
-            self.weights = self.weights - self.learning_rate * gradient / number_of_examples
+
+            self.weights = self.weights + self.learning_rate * gradient / number_of_examples
 
         return self
 
+    def net_input(self, X):
+        return np.dot(X, self.weights)
 
-ppn = Ada(learning_rate=0.1, epochs=100)
+    def activation(self, net_input):
+        return 1. / (1. + np.exp(net_input))
+
+
+ppn = LogisticRegression(learning_rate=0.1, epochs=100)
 ppn.fit(X, y)
 plt.plot(range(1, len(ppn.errors) + 1), ppn.errors, marker='o')
 plt.xlabel('Epochs')
