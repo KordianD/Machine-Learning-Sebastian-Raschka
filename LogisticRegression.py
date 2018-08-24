@@ -1,30 +1,9 @@
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+import helper
 
-df = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data', header=None)
-print(df.tail())
+X, y = helper.get_iris_data()
 
-y = df.iloc[0:100, 4].values
-y = np.where(y == 'Iris-setosa', 0, 1)
-
-number_of_examples = 100
-
-X = df.iloc[0:number_of_examples, [0, 2]].values
-
-X = np.concatenate((np.ones(number_of_examples)[:, np.newaxis], X), axis=1)
-
-X[:, 1] = (X[:, 1] - X[:, 1].mean()) / X[:, 1].std()
-X[:, 2] = (X[:, 2] - X[:, 2].mean()) / X[:, 2].std()
-
-plt.scatter(X[:50, 1], X[:50, 2], color='red', marker='o', label='setosa')
-plt.scatter(X[50:100, 1], X[50:100, 2], color='blue', marker='x', label='versicolor')
-
-plt.ylabel('petal length [cm]')
-plt.legend(loc='upper left')
-plt.show()
-
-print("SIZES " + str(X.shape))
+helper.plot_iris_data(X)
 
 
 class LogisticRegression:
@@ -39,6 +18,7 @@ class LogisticRegression:
         self.weights = rgen.normal(loc=0.0, scale=0.01, size=X.shape[1])
         self.weights = np.array(self.weights).reshape((3, 1))
         self.errors = []
+        number_of_examples = X.shape[0]
 
         for _ in range(self.epochs):
             net_input = self.net_input(X)
@@ -64,8 +44,7 @@ class LogisticRegression:
 
 
 ppn = LogisticRegression(learning_rate=0.1, epochs=100)
+
 ppn.fit(X, y)
-plt.plot(range(1, len(ppn.errors) + 1), ppn.errors, marker='o')
-plt.xlabel('Epochs')
-plt.ylabel('Training')
-plt.show()
+
+helper.plot_training(ppn.errors)
